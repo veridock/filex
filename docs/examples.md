@@ -15,32 +15,32 @@ Stworzyłem kompletne narzędzie CLI do edycji plików SVG/HTML/XML z rozszerzen
 ### CLI - podstawowe komendy:
 ```bash
 # Załaduj plik (lokalny lub zdalny)
-python file_editor.py load example.svg
-python file_editor.py load http://example.com/file.svg
+python xsl.py load example.svg
+python xsl.py load http://example.com/file.svg
 
 # Zapytania XPath
-python file_editor.py query "//svg:text[@id='title']"
-python file_editor.py query "//svg:image/@xlink:href" --type attribute --attr href
+python xsl.py query "//svg:text[@id='title']"
+python xsl.py query "//svg:image/@xlink:href" --type attribute --attr href
 
 # Edycja elementów
-python file_editor.py set "//svg:text[@id='title']" "Nowy tekst"
-python file_editor.py set "//svg:rect[@id='box']" --type attribute --attr fill "red"
+python xsl.py set "//svg:text[@id='title']" "Nowy tekst"
+python xsl.py set "//svg:rect[@id='box']" --type attribute --attr fill "red"
 
 # Ekstrakcja Data URI
-python file_editor.py extract "//svg:image/@xlink:href" --info
-python file_editor.py extract "//svg:image/@xlink:href" --output extracted.pdf
+python xsl.py extract "//svg:image/@xlink:href" --info
+python xsl.py extract "//svg:image/@xlink:href" --output extracted.pdf
 
 # Listowanie elementów
-python file_editor.py list --xpath "//svg:*" --limit 10
+python xsl.py list --xpath "//svg:*" --limit 10
 
 # Zapisz zmiany
-python file_editor.py save --output modified.svg
+python xsl.py save --output modified.svg
 ```
 
 ### Interaktywny shell:
 ```bash
 ```bash
-python file_editor.py shell
+python xsl.py shell
 
 # W shellu:
 📝 > load example.svg
@@ -53,14 +53,14 @@ python file_editor.py shell
 
 ### Serwer HTTP:
 ```bash
-python file_editor.py server --port 8080 --host localhost
+python xsl.py server --port 8082 --host localhost
 
 # API endpoints:
-GET  http://localhost:8080/api/extract?url=<URL>&xpath=<XPATH>
-POST http://localhost:8080/api/load
-POST http://localhost:8080/api/query
-POST http://localhost:8080/api/update
-POST http://localhost:8080/api/save
+GET  http://localhost:8082/api/extract?url=<URL>&xpath=<XPATH>
+POST http://localhost:8082/api/load
+POST http://localhost:8082/api/query
+POST http://localhost:8082/api/update
+POST http://localhost:8082/api/save
 ```
 
 ## 🌐 **Interfejs webowy:**
@@ -72,7 +72,7 @@ Serwer HTTP dostarcza intuicyjny interfejs z dwoma zakładkami:
 ## 📊 **Tworzenie przykładów:**
 
 ```bash
-python file_editor.py examples --dir ./test_files
+python xsl.py examples --dir ./test_files
 ```
 
 Tworzy przykładowe pliki:
@@ -112,15 +112,15 @@ Tworzy przykładowe pliki:
 ### 1. **Ekstrakcja PDF z SVG:**
 ```bash
 # Info o Data URI
-python file_editor.py extract "//svg:image/@xlink:href" --info
+python xsl.py extract "//svg:image/@xlink:href" --info
 
 # Zapisz PDF do pliku
-python file_editor.py extract "//svg:image/@xlink:href" --output document.pdf
+python xsl.py extract "//svg:image/@xlink:href" --output document.pdf
 ```
 
 ### 2. **Zdalna ekstrakcja przez API:**
 ```bash
-curl "http://localhost:8080/api/extract?url=http://example.com/diagram.svg&xpath=//svg:image/@xlink:href"
+curl "http://localhost:8082/api/extract?url=http://example.com/diagram.svg&xpath=//svg:image/@xlink:href"
 ```
 
 ### 3. **Batch processing w shell:**
