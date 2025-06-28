@@ -299,6 +299,7 @@ class FileEditor:
                             if 'image/' in result.get('mime_type', ''):
                                 result['base64_data'] = uri.split(',', 1)[1]  # Store base64 data
                                 result['data'] = result['base64_data']  # Keep for backward compatibility
+                                result['size'] = len(result['base64_data'])  # Add size field
                             result['xpath'] = xpath
                             return result
                         except Exception as e:
@@ -318,6 +319,7 @@ class FileEditor:
                             if 'image/' in result.get('mime_type', ''):
                                 result['base64_data'] = uri.split(',', 1)[1]  # Store base64 data
                                 result['data'] = result['base64_data']  # Keep for backward compatibility
+                                result['size'] = len(result['base64_data'])  # Add size field
                             result['xpath'] = xpath
                             return result
                         except Exception as e:
