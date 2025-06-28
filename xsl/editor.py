@@ -50,6 +50,7 @@ class FileEditor:
         """
         self.file_path = file_path
         self.tree = None
+        self.original_content = None
         # Default namespaces for common XML formats
         self.ns = {
             'svg': 'http://www.w3.org/2000/svg',
@@ -58,19 +59,38 @@ class FileEditor:
             'xhtml': 'http://www.w3.org/1999/xhtml'
         }
         self._load_file()
+    
+    @property
+    def is_remote(self) -> bool:
+        """Check if the file is a remote URL.
+        
+        Returns:
+            bool: True if file_path is a URL, False otherwise
+        """
+        return (isinstance(self.file_path, str) and 
+                (self.file_path.startswith('http://') or 
+                 self.file_path.startswith('https://') or
+                 self.file_path.startswith('ftp://')))
 
     def _load_file(self):
-        """Load file from path or URL."""
-        if self.file_path.startswith(('http://', 'https://')):
-            if not REQUESTS_AVAILABLE:
-                raise ImportError("requests library is required for loading remote files")
-            response = requests.get(self.file_path)
-            response.raise_for_status()
-            content = response.content
-            self._parse_content(content)
+        """Load file content from path or URL."""
+        if not self.file_path:
+            raise ValueError("No file path provided")
+            
+        if self.is_remote:
+            import requests
+            try:
+                response = requests.get(self.file_path)
+                response.raise_for_status()
+                content = response.content
+            except Exception as e:
+                raise IOError(f"Failed to fetch remote file: {str(e)}")
         else:
             with open(self.file_path, 'rb') as f:
-                self._parse_content(f.read())
+                content = f.read()
+        
+        self.original_content = content.decode('utf-8')
+        self._parse_content(content)
 
     def _parse_content(self, content: bytes):
         """Parse file content with appropriate parser.
@@ -241,19 +261,58 @@ class FileEditor:
             xpath: XPath to the element containing data URI
             
         Returns:
-            dict: Parsed data URI components or None if not found
+            dict: Parsed data URI components with 'mime_type' and other metadata,
+                  or {'error': str} if not found
         """
-        elements = self.query(xpath)
-        if not elements:
-            return None
+        try:
+            elements = self.query(xpath)
+            if not elements:
+                return {'error': 'No elements found matching XPATH'}
+                
+            # Handle attribute XPath (e.g., @xlink:href)
+            attr = None
+            if xpath.endswith('/@xlink:href'):
+                element_xpath = xpath.rsplit('/', 1)[0]
+                attr = 'xlink:href'
+                elements = self.query(element_xpath)
+            elif xpath.endswith('/@href'):
+                element_xpath = xpath.rsplit('/', 1)[0]
+                attr = 'href'
+                elements = self.query(element_xpath)
             
-        # Try common attribute names for data URIs
-        for attr in ['href', 'xlink:href', 'data', 'src']:
-            if hasattr(elements[0], 'get'):
-                uri = elements[0].get(attr)
-                if uri and is_data_uri(uri):
-                    return parse_data_uri(uri)
-        return None
+            if not elements:
+                return {'error': 'No elements found matching XPath'}
+                
+            # Try to find a data URI in the elements
+            for elem in elements:
+                # If we have a specific attribute, check that first
+                if attr:
+                    uri = self._get_attribute(elem, attr)
+                    if uri and is_data_uri(uri):
+                        result = parse_data_uri(uri)
+                        result['xpath'] = xpath
+                        return result
+                
+                # Otherwise check common attributes
+                for attr_name in ['xlink:href', 'href', 'data', 'src']:
+                    uri = self._get_attribute(elem, attr_name)
+                    if uri and is_data_uri(uri):
+                        result = parse_data_uri(uri)
+                        result['xpath'] = xpath
+                        return result
+            
+            return {
+                'error': 'No data URI found in element attributes',
+                'mime_type': 'text/plain',
+                'data': ''
+            }
+            
+        except Exception as e:
+            return {
+                'error': f'Error extracting data URI: {str(e)}',
+                'mime_type': 'text/plain',
+                'data': ''
+            }
     
     def _get_attribute(self, element, name: str) -> str:
         """Get an attribute from an element, handling namespaces.
@@ -329,6 +388,37 @@ class FileEditor:
             if hasattr(elem, 'text'):
                 elem.text = text
         return True
+        
+    def set_element_attribute(self, xpath: str, attr_name: str, attr_value: str) -> bool:
+        """Set an attribute on elements matching XPath.
+        
+        Args:
+            xpath: XPath to the element(s)
+            attr_name: Name of the attribute to set
+            attr_value: Value to set
+            
+        Returns:
+            bool: True if any elements were modified, False otherwise
+        """
+        elements = self.query(xpath)
+        if not elements:
+            return False
+            
+        modified = False
+        for elem in elements:
+            if hasattr(elem, 'set'):
+                # Handle namespaced attributes (e.g., xlink:href)
+                if ':' in attr_name:
+                    prefix = attr_name.split(':', 1)[0]
+                    if prefix in self.ns:
+                        ns_attr = f"{{{self.ns[prefix]}}}{attr_name.split(':', 1)[1]}"
+                        elem.set(ns_attr, attr_value)
+                        modified = True
+                else:
+                    elem.set(attr_name, attr_value)
+                    modified = True
+                    
+        return modified
     
     def list_elements(self, xpath: str) -> List[Dict[str, Any]]:
         """List elements matching XPath with their attributes.

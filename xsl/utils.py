@@ -50,7 +50,12 @@ def parse_data_uri(uri: str) -> Dict[str, Any]:
         raise ValueError("Invalid data URI")
         
     mime = match.group('mime') or 'text/plain'
-    charset = (match.group('charset') or ';charset=utf-8').lstrip(';')
+    charset = None
+    if match.group('charset'):
+        # Extract just the charset value without the 'charset=' prefix
+        charset_match = re.search(r'charset=([^;]+)', match.group('charset'))
+        if charset_match:
+            charset = charset_match.group(1)
     is_base64 = bool(match.group('base64'))
     data = match.group('data')
     
@@ -63,13 +68,20 @@ def parse_data_uri(uri: str) -> Dict[str, Any]:
     else:
         data_bytes = data.encode('utf-8')
     
+    # For base64 data, return the original base64 string
+    # For non-base64 data, return the raw string
+    data_str = data if is_base64 else data_bytes.decode(charset or 'utf-8')
+    if not is_base64 and not isinstance(data_str, str):
+        data_str = data_bytes.decode('utf-8', errors='replace')
+        charset = 'utf-8'
+    
     return {
         'mime_type': mime,  # Changed from 'mime' to match test expectations
         'mime': mime,  # Keep both for backward compatibility
         'encoding': 'base64' if is_base64 else 'utf-8',  # Add encoding for test compatibility
-        'charset': charset,
+        'charset': charset or 'utf-8',
         'is_base64': is_base64,
-        'data': data_bytes
+        'data': data_str  # Return as string to match test expectations
     }
 
 def create_data_uri(data: bytes, mime: str = 'application/octet-stream', 
