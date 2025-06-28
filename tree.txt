@@ -1,0 +1,26 @@
+filex2/
+├── pyproject.toml              # Poetry configuration
+├── README.md                   # Project documentation
+├── LICENSE                     # MIT License
+├── .gitignore                  # Git ignore rules
+├── filex/                      # Main package
+│   ├── __init__.py            # Package initialization
+│   ├── editor.py              # Core FileEditor class
+│   ├── cli.py                 # CLI interface
+│   ├── server.py              # HTTP server
+│   └── utils.py               # Utility functions
+├── tests/                      # Test suite
+│   ├── __init__.py
+│   ├── test_editor.py
+│   ├── test_cli.py
+│   └── fixtures/              # Test files
+│       ├── example.svg
+│       ├── example.xml
+│       └── example.html
+├── docs/                       # Documentation
+│   ├── index.md
+│   ├── cli.md
+│   ├── api.md
+│   └── examples.md
+└── scripts/                    # Utility scripts
+    └── create_examples.py
