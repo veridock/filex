@@ -20,68 +20,92 @@ class CLI:
     def run(self):
         """Run the CLI with command line arguments."""
         parser = argparse.ArgumentParser(
-            description='xsl - Universal File Editor for XML/SVG/HTML',
-            epilog='For more information, visit: https://github.com/veridock/xsl'
+            description="xsl - Universal File Editor for XML/SVG/HTML",
+            epilog="For more information, visit: https://github.com/veridock/xsl",
         )
-        parser.add_argument('--version', action='version', version=f'xsl {__version__}')
+        parser.add_argument("--version", action="version", version=f"xsl {__version__}")
 
-        subparsers = parser.add_subparsers(dest='command', help='Available commands')
+        subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
         # Load command
-        load_parser = subparsers.add_parser('load', help='Load file (local or remote)')
-        load_parser.add_argument('file', help='File path or URL')
+        load_parser = subparsers.add_parser("load", help="Load file (local or remote)")
+        load_parser.add_argument("file", help="File path or URL")
 
         # Query command
-        query_parser = subparsers.add_parser('query', help='Query elements using XPath')
-        query_parser.add_argument('xpath', help='XPath expression')
-        query_parser.add_argument('--type', choices=['text', 'attribute'], default='text',
-                                  help='Query type (default: text)')
-        query_parser.add_argument('--attr', help='Attribute name (required for attribute type)')
+        query_parser = subparsers.add_parser("query", help="Query elements using XPath")
+        query_parser.add_argument("xpath", help="XPath expression")
+        query_parser.add_argument(
+            "--type",
+            choices=["text", "attribute"],
+            default="text",
+            help="Query type (default: text)",
+        )
+        query_parser.add_argument(
+            "--attr", help="Attribute name (required for attribute type)"
+        )
 
         # Set command
-        set_parser = subparsers.add_parser('set', help='Set element value')
-        set_parser.add_argument('xpath', help='XPath expression')
-        set_parser.add_argument('value', help='New value')
-        set_parser.add_argument('--type', choices=['text', 'attribute'], default='text',
-                                help='Set type (default: text)')
-        set_parser.add_argument('--attr', help='Attribute name (required for attribute type)')
+        set_parser = subparsers.add_parser("set", help="Set element value")
+        set_parser.add_argument("xpath", help="XPath expression")
+        set_parser.add_argument("value", help="New value")
+        set_parser.add_argument(
+            "--type",
+            choices=["text", "attribute"],
+            default="text",
+            help="Set type (default: text)",
+        )
+        set_parser.add_argument(
+            "--attr", help="Attribute name (required for attribute type)"
+        )
 
         # Extract Data URI command
-        extract_parser = subparsers.add_parser('extract', help='Extract Data URI from element')
-        extract_parser.add_argument('xpath', help='XPath to element with Data URI')
-        extract_parser.add_argument('--output', help='Save extracted data to file')
-        extract_parser.add_argument('--info', action='store_true', help='Show Data URI info only')
+        extract_parser = subparsers.add_parser(
+            "extract", help="Extract Data URI from element"
+        )
+        extract_parser.add_argument("xpath", help="XPath to element with Data URI")
+        extract_parser.add_argument("--output", help="Save extracted data to file")
+        extract_parser.add_argument(
+            "--info", action="store_true", help="Show Data URI info only"
+        )
 
         # List command
-        list_parser = subparsers.add_parser('list', help='List elements')
-        list_parser.add_argument('--xpath', default='//*', help='XPath filter (default: //*)')
-        list_parser.add_argument('--limit', type=int, default=20, help='Limit results (default: 20)')
+        list_parser = subparsers.add_parser("list", help="List elements")
+        list_parser.add_argument(
+            "--xpath", default="//*", help="XPath filter (default: //*)"
+        )
+        list_parser.add_argument(
+            "--limit", type=int, default=20, help="Limit results (default: 20)"
+        )
 
         # Add command
-        add_parser = subparsers.add_parser('add', help='Add new element')
-        add_parser.add_argument('parent_xpath', help='XPath to parent element')
-        add_parser.add_argument('tag', help='New element tag name')
-        add_parser.add_argument('--text', help='Element text content')
-        add_parser.add_argument('--attrs', help='Attributes as key=value,key=value')
+        add_parser = subparsers.add_parser("add", help="Add new element")
+        add_parser.add_argument("parent_xpath", help="XPath to parent element")
+        add_parser.add_argument("tag", help="New element tag name")
+        add_parser.add_argument("--text", help="Element text content")
+        add_parser.add_argument("--attrs", help="Attributes as key=value,key=value")
 
         # Remove command
-        remove_parser = subparsers.add_parser('remove', help='Remove element')
-        remove_parser.add_argument('xpath', help='XPath to element to remove')
+        remove_parser = subparsers.add_parser("remove", help="Remove element")
+        remove_parser.add_argument("xpath", help="XPath to element to remove")
 
         # Save command
-        save_parser = subparsers.add_parser('save', help='Save file')
-        save_parser.add_argument('--output', help='Output file path')
-        save_parser.add_argument('--backup', action='store_true', help='Create backup before saving')
+        save_parser = subparsers.add_parser("save", help="Save file")
+        save_parser.add_argument("--output", help="Output file path")
+        save_parser.add_argument(
+            "--backup", action="store_true", help="Create backup before saving"
+        )
 
         # Info command
-        info_parser = subparsers.add_parser('info', help='Show file information')
+        info_parser = subparsers.add_parser("info", help="Show file information")
 
         # Shell command
-        shell_parser = subparsers.add_parser('shell', help='Interactive shell mode')
+        shell_parser = subparsers.add_parser("shell", help="Interactive shell mode")
 
         # Examples command
-        examples_parser = subparsers.add_parser('examples', help='Create example files')
-        examples_parser.add_argument('--dir', default='.', help='Directory to create examples (default: .)')
+        examples_parser = subparsers.add_parser("examples", help="Create example files")
+        examples_parser.add_argument(
+            "--dir", default=".", help="Directory to create examples (default: .)"
+        )
 
         args = parser.parse_args()
 
@@ -90,9 +114,9 @@ class CLI:
             return
 
         try:
-            if args.command == 'shell':
+            if args.command == "shell":
                 self.start_shell()
-            elif args.command == 'examples':
+            elif args.command == "examples":
                 self.create_examples(args.dir)
             else:
                 self.execute_command(args)
@@ -105,29 +129,29 @@ class CLI:
 
     def execute_command(self, args):
         """Execute a single command."""
-        if args.command == 'load':
+        if args.command == "load":
             self.editor = FileEditor(args.file)
-            file_type = "remote" if args.file.startswith('http') else "local"
+            file_type = "remote" if args.file.startswith("http") else "local"
             print(f"✅ Loaded {file_type} file: {args.file} ({self.editor.file_type})")
 
             info = self.editor.get_info()
-            if 'elements_count' in info:
+            if "elements_count" in info:
                 print(f"   Found {info['elements_count']} elements")
 
-        elif args.command == 'query':
+        elif args.command == "query":
             self._require_loaded_file()
 
-            if args.type == 'text':
+            if args.type == "text":
                 result = self.editor.get_element_text(args.xpath)
                 print(f"Text: {result}")
-            elif args.type == 'attribute':
+            elif args.type == "attribute":
                 if not args.attr:
                     print("❌ --attr required for attribute queries")
                     return
                 result = self.editor.get_element_attribute(args.xpath, args.attr)
                 print(f"Attribute {args.attr}: {result}")
 
-        elif args.command == 'extract':
+        elif args.command == "extract":
             self._require_loaded_file()
 
             if args.info:
@@ -154,27 +178,32 @@ class CLI:
                 else:
                     print(f"MIME: {result['mime_type']}")
                     print(f"Size: {result['size']} bytes")
-                    preview = result['base64_data'][:100] + "..." if len(result['base64_data']) > 100 else result[
-                        'base64_data']
+                    preview = (
+                        result["base64_data"][:100] + "..."
+                        if len(result["base64_data"]) > 100
+                        else result["base64_data"]
+                    )
                     print(f"Base64 data: {preview}")
 
-        elif args.command == 'set':
+        elif args.command == "set":
             self._require_loaded_file()
 
-            if args.type == 'text':
+            if args.type == "text":
                 success = self.editor.set_element_text(args.xpath, args.value)
-            elif args.type == 'attribute':
+            elif args.type == "attribute":
                 if not args.attr:
                     print("❌ --attr required for attribute updates")
                     return
-                success = self.editor.set_element_attribute(args.xpath, args.attr, args.value)
+                success = self.editor.set_element_attribute(
+                    args.xpath, args.attr, args.value
+                )
 
             if success:
                 print("✅ Element updated")
             else:
                 print("❌ Element not found")
 
-        elif args.command == 'list':
+        elif args.command == "list":
             self._require_loaded_file()
 
             elements = self.editor.list_elements(args.xpath)
@@ -183,36 +212,44 @@ class CLI:
                 return
 
             print(f"Found {len(elements)} elements:")
-            for i, elem in enumerate(elements[:args.limit]):
+            for i, elem in enumerate(elements[: args.limit]):
                 print(f"\n{i + 1}. Path: {elem['path']}")
                 print(f"   Tag: {elem['tag']}")
-                if elem['text']:
-                    text_preview = elem['text'][:100] + "..." if len(elem['text']) > 100 else elem['text']
+                if elem["text"]:
+                    text_preview = (
+                        elem["text"][:100] + "..."
+                        if len(elem["text"]) > 100
+                        else elem["text"]
+                    )
                     print(f"   Text: {repr(text_preview)}")
-                if elem['attributes']:
+                if elem["attributes"]:
                     print(f"   Attributes: {elem['attributes']}")
 
             if len(elements) > args.limit:
-                print(f"\n... and {len(elements) - args.limit} more (use --limit to see more)")
+                print(
+                    f"\n... and {len(elements) - args.limit} more (use --limit to see more)"
+                )
 
-        elif args.command == 'add':
+        elif args.command == "add":
             self._require_loaded_file()
 
             # Parse attributes
             attributes = {}
             if args.attrs:
-                for pair in args.attrs.split(','):
-                    if '=' in pair:
-                        key, value = pair.split('=', 1)
+                for pair in args.attrs.split(","):
+                    if "=" in pair:
+                        key, value = pair.split("=", 1)
                         attributes[key.strip()] = value.strip()
 
-            success = self.editor.add_element(args.parent_xpath, args.tag, args.text or "", attributes)
+            success = self.editor.add_element(
+                args.parent_xpath, args.tag, args.text or "", attributes
+            )
             if success:
                 print("✅ Element added")
             else:
                 print("❌ Parent element not found")
 
-        elif args.command == 'remove':
+        elif args.command == "remove":
             self._require_loaded_file()
 
             success = self.editor.remove_element(args.xpath)
@@ -221,7 +258,7 @@ class CLI:
             else:
                 print("❌ Element not found")
 
-        elif args.command == 'info':
+        elif args.command == "info":
             self._require_loaded_file()
 
             info = self.editor.get_info()
@@ -230,10 +267,10 @@ class CLI:
             print(f"   Type: {info['file_type']}")
             print(f"   Remote: {info['is_remote']}")
             print(f"   Size: {info['size']} bytes")
-            if 'elements_count' in info:
+            if "elements_count" in info:
                 print(f"   Elements: {info['elements_count']}")
 
-        elif args.command == 'save':
+        elif args.command == "save":
             self._require_loaded_file()
 
             if self.editor.is_remote and not args.output:
@@ -281,29 +318,31 @@ class CLI:
                 if not command_line:
                     continue
 
-                if command_line == 'exit':
+                if command_line == "exit":
                     break
-                elif command_line == 'help':
-                    print("Available commands: load, query, attr, set, setattr, extract, save, list, info, help, exit")
+                elif command_line == "help":
+                    print(
+                        "Available commands: load, query, attr, set, setattr, extract, save, list, info, help, exit"
+                    )
                     continue
 
                 parts = command_line.split()
                 command = parts[0]
 
-                if command == 'load' and len(parts) == 2:
+                if command == "load" and len(parts) == 2:
                     self.editor = FileEditor(parts[1])
-                    file_type = "remote" if parts[1].startswith('http') else "local"
+                    file_type = "remote" if parts[1].startswith("http") else "local"
                     print(f"✅ Loaded {file_type} file ({self.editor.file_type})")
 
-                elif command == 'query' and len(parts) >= 2:
+                elif command == "query" and len(parts) >= 2:
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
-                    xpath = ' '.join(parts[1:])
+                    xpath = " ".join(parts[1:])
                     result = self.editor.get_element_text(xpath)
                     print(f"Result: {result}")
 
-                elif command == 'attr' and len(parts) >= 3:
+                elif command == "attr" and len(parts) >= 3:
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
@@ -312,56 +351,66 @@ class CLI:
                     result = self.editor.get_element_attribute(xpath, attr_name)
                     print(f"Attribute {attr_name}: {result}")
 
-                elif command == 'set' and len(parts) >= 3:
+                elif command == "set" and len(parts) >= 3:
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
                     xpath = parts[1]
-                    value = ' '.join(parts[2:])
+                    value = " ".join(parts[2:])
                     success = self.editor.set_element_text(xpath, value)
                     print("✅ Updated" if success else "❌ Not found")
 
-                elif command == 'setattr' and len(parts) >= 4:
+                elif command == "setattr" and len(parts) >= 4:
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
                     xpath = parts[1]
                     attr_name = parts[2]
-                    attr_value = ' '.join(parts[3:])
-                    success = self.editor.set_element_attribute(xpath, attr_name, attr_value)
+                    attr_value = " ".join(parts[3:])
+                    success = self.editor.set_element_attribute(
+                        xpath, attr_name, attr_value
+                    )
                     print("✅ Updated" if success else "❌ Not found")
 
-                elif command == 'extract' and len(parts) >= 2:
+                elif command == "extract" and len(parts) >= 2:
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
-                    xpath = ' '.join(parts[1:])
+                    xpath = " ".join(parts[1:])
                     result = self.editor.extract_data_uri(xpath)
                     if "error" in result:
                         print(f"❌ {result['error']}")
                     else:
-                        print(f"✅ MIME: {result['mime_type']}, Size: {result['size']} bytes")
+                        print(
+                            f"✅ MIME: {result['mime_type']}, Size: {result['size']} bytes"
+                        )
 
-                elif command == 'list':
+                elif command == "list":
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
                     xpath = parts[1] if len(parts) > 1 else "//*"
                     elements = self.editor.list_elements(xpath)[:10]  # limit to 10
                     for elem in elements:
-                        text_preview = elem['text'][:50] + "..." if len(elem['text']) > 50 else elem['text']
+                        text_preview = (
+                            elem["text"][:50] + "..."
+                            if len(elem["text"]) > 50
+                            else elem["text"]
+                        )
                         print(f"{elem['tag']}: {repr(text_preview)}")
 
-                elif command == 'info':
+                elif command == "info":
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
                     info = self.editor.get_info()
-                    print(f"File: {info['file_path']} ({info['file_type']}, {info['size']} bytes)")
-                    if 'elements_count' in info:
+                    print(
+                        f"File: {info['file_path']} ({info['file_type']}, {info['size']} bytes)"
+                    )
+                    if "elements_count" in info:
                         print(f"Elements: {info['elements_count']}")
 
-                elif command == 'save':
+                elif command == "save":
                     if not self.editor:
                         print("❌ No file loaded")
                         continue
@@ -373,7 +422,9 @@ class CLI:
                     print("✅ Saved" if success else "❌ Save failed")
 
                 else:
-                    print("❌ Unknown command or wrong arguments. Type 'help' for available commands.")
+                    print(
+                        "❌ Unknown command or wrong arguments. Type 'help' for available commands."
+                    )
 
             except KeyboardInterrupt:
                 print("\n👋 Goodbye!")
@@ -384,6 +435,7 @@ class CLI:
     def create_examples(self, directory: str):
         """Create example files for testing."""
         from .examples import create_example_files
+
         try:
             create_example_files(directory)
             print(f"✅ Example files created in {directory}")

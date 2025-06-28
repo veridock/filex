@@ -5,7 +5,7 @@ HTTP Server for xsl - Web interface for remote file editing.
 import argparse
 import json
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict
 from urllib.parse import parse_qs, urlparse
 
@@ -138,10 +138,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
+    main()
 
     def _extract_from_url(self, query):
         """Extract Data URI from URL using XPath (GET endpoint)."""

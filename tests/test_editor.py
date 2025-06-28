@@ -2,10 +2,11 @@
 Tests for FileEditor class.
 """
 
-import pytest
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
+
+import pytest
 
 # Import the module under test
 from xsl.editor import FileEditor
