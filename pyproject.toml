@@ -44,7 +44,9 @@ mypy = "^1.0.0"
 isort = "^5.12.0"
 
 [tool.poetry.scripts]
+# Command-line entry points
 xsl = "xsl.cli:main"
+# Server entry point
 xsl-server = "xsl.server:main"
 
 [build-system]

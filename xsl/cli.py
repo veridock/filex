@@ -2,13 +2,19 @@
 CLI interface for xsl.
 """
 
+"""
+Command-line interface for xsl.
+
+This module provides the CLI interface for the xsl package.
+"""
+
 import argparse
 import sys
+import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
-from . import __version__
-from .editor import FileEditor
+from . import __version__, FileEditor
 
 
 class CLI:
@@ -443,10 +449,22 @@ class CLI:
             print(f"❌ Error creating examples: {e}")
 
 
-def main():
-    """Entry point for the xsl CLI command."""
+def main(args: List[str] = None) -> int:
+    """Entry point for the xsl CLI command.
+    
+    Args:
+        args: Command line arguments (default: None, uses sys.argv)
+        
+    Returns:
+        int: Exit code (0 for success, non-zero for error)
+    """
     cli = CLI()
-    cli.run()
+    try:
+        cli.run(args)
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
