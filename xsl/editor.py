@@ -44,10 +44,19 @@ class FileEditor:
         
         Args:
             file_path: Path to file or URL
+            
+        Raises:
+            ValueError: If the file cannot be loaded or parsed
         """
         self.file_path = file_path
         self.tree = None
-        self.ns = {}
+        # Default namespaces for common XML formats
+        self.ns = {
+            'svg': 'http://www.w3.org/2000/svg',
+            'xlink': 'http://www.w3.org/1999/xlink',
+            'html': 'http://www.w3.org/1999/xhtml',
+            'xhtml': 'http://www.w3.org/1999/xhtml'
+        }
         self._load_file()
 
     def _load_file(self):
@@ -64,41 +73,62 @@ class FileEditor:
                 self._parse_content(f.read())
 
     def _parse_content(self, content: bytes):
-        """Parse file content with appropriate parser."""
+        """Parse file content with appropriate parser.
+        
+        Args:
+            content: The raw bytes content to parse
+            
+        Raises:
+            ValueError: If the content cannot be parsed
+        """
         if LXML_AVAILABLE:
             try:
                 self.tree = etree.fromstring(content)
-                # Register namespaces
-                for k, v in self.tree.nsmap.items():
-                    if k:
-                        self.ns[k] = v
+                # Update namespaces from the document
+                if hasattr(self.tree, 'nsmap'):
+                    for prefix, uri in self.tree.nsmap.items():
+                        if prefix is not None:  # Skip default namespace
+                            self.ns[prefix] = uri
                 return
-            except Exception as e:
+            except etree.XMLSyntaxError as e:
                 logging.warning(f"Failed to parse with lxml: {e}")
+                # Continue to standard library fallback
         
         # Fallback to standard library
         try:
             self.tree = ET.fromstring(content)
         except ET.ParseError as e:
-            raise ValueError(f"Failed to parse XML content: {e}")
+            raise ValueError(f"Cannot parse file: {str(e)}")
 
     def query(self, xpath: str) -> List[Any]:
         """Query elements using XPath.
         
         Args:
-            xpath: XPath expression
+            xpath: XPath expression (can include namespaces)
             
         Returns:
             List of matching elements
+            
+        Raises:
+            ValueError: If no file is loaded or XPath is invalid
         """
-        if not self.tree:
+        if self.tree is None:
             raise ValueError("No file loaded")
             
-        if LXML_AVAILABLE:
-            return self.tree.xpath(xpath, namespaces=self.ns)
-        else:
-            # Basic XPath support with standard library
-            return self.tree.findall(xpath)
+        try:
+            if LXML_AVAILABLE:
+                # Register namespaces with lxml
+                return self.tree.xpath(xpath, namespaces=self.ns)
+            else:
+                # Basic XPath support with standard library
+                # Replace namespace prefixes in XPath for standard library
+                if ':' in xpath:
+                    # Simple namespace handling for standard library
+                    for prefix, uri in self.ns.items():
+                        xpath = xpath.replace(f"{prefix}:", f"{{'{uri}'}}")
+                return self.tree.findall(xpath)
+        except Exception as e:
+            raise ValueError(f"Invalid XPath expression '{xpath}': {str(e)}")
 
     def set_value(self, xpath: str, value: str) -> bool:
         """Set value of elements matching XPath.
@@ -226,15 +256,118 @@ class FileEditor:
         return None
     
     def _get_attribute(self, element, name: str) -> str:
-        """Get an attribute from an element, handling namespaces."""
-        if hasattr(element, 'get'):
-            # Try direct attribute first
-            value = element.get(name)
-            if value is not None:
-                return value
+        """Get an attribute from an element, handling namespaces.
+        
+        Args:
+            element: The XML element
+            name: Attribute name (can include namespace prefix)
+            
+        Returns:
+            The attribute value or None if not found
+        """
+        if not hasattr(element, 'get'):
+            return None
+            
+        # Try direct attribute first
+        value = element.get(name)
+        if value is not None:
+            return value
+            
+        # Try with xlink: prefix
+        if name.startswith('xlink:'):
+            return element.get(f"{{{self.ns.get('xlink', '')}}}{name[6:]}")
+            
+        # Try with full namespace
+        if ':' in name:
+            prefix = name.split(':', 1)[0]
+            if prefix in self.ns:
+                return element.get(f"{{{self.ns[prefix]}}}{name.split(':', 1)[1]}")
                 
-            # Try with xlink: prefix
-            if 'xlink:' in name:
-                return element.get(name.split(':')[-1])
-            return element.get(f"{{{self.ns.get('xlink', '')}}}{name}")
         return None
+    
+    @property
+    def file_type(self) -> str:
+        """Get the type of the loaded file.
+        
+        Returns:
+            str: File type ('svg', 'html', 'xml', or 'unknown')
+        """
+        return self.detect_file_type()
+    
+    def get_element_attribute(self, xpath: str, attr_name: str, default: str = None) -> str:
+        """Get an attribute value from an element.
+        
+        Args:
+            xpath: XPath to the element
+            attr_name: Name of the attribute to get
+            default: Default value if attribute not found
+            
+        Returns:
+            The attribute value or default if not found
+        """
+        elements = self.query(xpath)
+        if not elements:
+            return default
+            
+        return self._get_attribute(elements[0], attr_name) or default
+    
+    def set_element_text(self, xpath: str, text: str) -> bool:
+        """Set the text content of an element.
+        
+        Args:
+            xpath: XPath to the element
+            text: New text content
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        elements = self.query(xpath)
+        if not elements:
+            return False
+            
+        for elem in elements:
+            if hasattr(elem, 'text'):
+                elem.text = text
+        return True
+    
+    def list_elements(self, xpath: str) -> List[Dict[str, Any]]:
+        """List elements matching XPath with their attributes.
+        
+        Args:
+            xpath: XPath expression to find elements
+            
+        Returns:
+            List of dictionaries with element information
+        """
+        elements = self.query(xpath)
+        result = []
+        
+        for elem in elements:
+            if hasattr(elem, 'attrib'):
+                result.append({
+                    'tag': elem.tag,
+                    'text': getattr(elem, 'text', ''),
+                    'attributes': dict(elem.attrib)
+                })
+        
+        return result
+    
+    def backup(self) -> str:
+        """Create a backup of the current file.
+        
+        Returns:
+            str: Path to the backup file
+            
+        Raises:
+            IOError: If backup creation fails
+        """
+        if not self.file_path:
+            raise IOError("No file loaded to back up")
+            
+        backup_path = f"{self.file_path}.bak"
+        try:
+            import shutil
+            shutil.copy2(self.file_path, backup_path)
+            return backup_path
+        except Exception as e:
+            raise IOError(f"Failed to create backup: {str(e)}")

@@ -64,7 +64,9 @@ def parse_data_uri(uri: str) -> Dict[str, Any]:
         data_bytes = data.encode('utf-8')
     
     return {
-        'mime': mime,
+        'mime_type': mime,  # Changed from 'mime' to match test expectations
+        'mime': mime,  # Keep both for backward compatibility
+        'encoding': 'base64' if is_base64 else 'utf-8',  # Add encoding for test compatibility
         'charset': charset,
         'is_base64': is_base64,
         'data': data_bytes
