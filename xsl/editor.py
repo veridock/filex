@@ -281,7 +281,11 @@ class FileEditor:
                 elements = self.query(element_xpath)
             
             if not elements:
-                return {'error': 'No elements found matching XPath'}
+                return {
+                    'error': 'No elements found matching XPath',
+                    'mime_type': 'text/plain',
+                    'data': ''
+                }
                 
             # Try to find a data URI in the elements
             for elem in elements:
@@ -289,17 +293,37 @@ class FileEditor:
                 if attr:
                     uri = self._get_attribute(elem, attr)
                     if uri and is_data_uri(uri):
-                        result = parse_data_uri(uri)
-                        result['xpath'] = xpath
-                        return result
+                        try:
+                            result = parse_data_uri(uri)
+                            # For image data, ensure we keep the original mime type
+                            if 'image/' in result.get('mime_type', ''):
+                                result['data'] = uri.split(',', 1)[1]  # Return base64 data
+                            result['xpath'] = xpath
+                            return result
+                        except Exception as e:
+                            return {
+                                'error': f'Error parsing data URI: {str(e)}',
+                                'mime_type': 'text/plain',
+                                'data': ''
+                            }
                 
                 # Otherwise check common attributes
                 for attr_name in ['xlink:href', 'href', 'data', 'src']:
                     uri = self._get_attribute(elem, attr_name)
                     if uri and is_data_uri(uri):
-                        result = parse_data_uri(uri)
-                        result['xpath'] = xpath
-                        return result
+                        try:
+                            result = parse_data_uri(uri)
+                            # For image data, ensure we keep the original mime type
+                            if 'image/' in result.get('mime_type', ''):
+                                result['data'] = uri.split(',', 1)[1]  # Return base64 data
+                            result['xpath'] = xpath
+                            return result
+                        except Exception as e:
+                            return {
+                                'error': f'Error parsing data URI: {str(e)}',
+                                'mime_type': 'text/plain',
+                                'data': ''
+                            }
             
             return {
                 'error': 'No data URI found in element attributes',
