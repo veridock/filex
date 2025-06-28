@@ -5,9 +5,9 @@ description = "Universal File Editor for XML/SVG/HTML with XPath and CSS selecto
 authors = ["Tom Sapletta <info@softreck.dev>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/veridock/filex"
-repository = "https://github.com/veridock/filex"
-documentation = "https://github.com/veridock/filex/docs"
+homepage = "https://github.com/veridock/xsl"
+repository = "https://github.com/veridock/xsl"
+documentation = "https://github.com/veridock/xsl/docs"
 keywords = ["xml", "svg", "html", "xpath", "editor", "cli"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -44,8 +44,8 @@ mypy = "^1.0.0"
 isort = "^5.12.0"
 
 [tool.poetry.scripts]
-filex = "filex.cli:main"
-filex-server = "filex.server:main"
+xsl = "xsl.cli:main"
+xsl-server = "xsl.server:main"
 
 [build-system]
 requires = ["poetry-core"]

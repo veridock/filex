@@ -1,9 +1,9 @@
-filex2/
+xsl2/
 ├── pyproject.toml              # Poetry configuration
 ├── README.md                   # Project documentation
 ├── LICENSE                     # MIT License
 ├── .gitignore                  # Git ignore rules
-├── filex/                      # Main package
+├── xsl/                      # Main package
 │   ├── __init__.py            # Package initialization
 │   ├── editor.py              # Core FileEditor class
 │   ├── cli.py                 # CLI interface
