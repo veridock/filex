@@ -297,7 +297,8 @@ class FileEditor:
                             result = parse_data_uri(uri)
                             # For image data, ensure we keep the original mime type
                             if 'image/' in result.get('mime_type', ''):
-                                result['data'] = uri.split(',', 1)[1]  # Return base64 data
+                                result['base64_data'] = uri.split(',', 1)[1]  # Store base64 data
+                                result['data'] = result['base64_data']  # Keep for backward compatibility
                             result['xpath'] = xpath
                             return result
                         except Exception as e:
@@ -315,7 +316,8 @@ class FileEditor:
                             result = parse_data_uri(uri)
                             # For image data, ensure we keep the original mime type
                             if 'image/' in result.get('mime_type', ''):
-                                result['data'] = uri.split(',', 1)[1]  # Return base64 data
+                                result['base64_data'] = uri.split(',', 1)[1]  # Store base64 data
+                                result['data'] = result['base64_data']  # Keep for backward compatibility
                             result['xpath'] = xpath
                             return result
                         except Exception as e:
