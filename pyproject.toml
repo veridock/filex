@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xsl"
-version = "0.1.5"
+version = "0.1.6"
 description = "Universal File Editor for XML/SVG/HTML with XPath and CSS selector support"
 authors = ["Tom Sapletta <info@softreck.dev>"]
 license = "Apache-2.0"
